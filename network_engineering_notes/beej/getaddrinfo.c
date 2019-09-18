@@ -26,6 +26,7 @@ int main()
 
   status = getaddrinfo(NULL, "3490", &hints, &servinfo);
   //servinfo now points to a linked list of struct addrinfos
+  //ie. servinfo is used to return value from getaddrinfo
   printf("%d\n", status);
   return 0;
 }

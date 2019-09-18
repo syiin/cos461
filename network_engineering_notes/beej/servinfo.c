@@ -19,8 +19,8 @@ int main(int argc, char *argv[])
   }
 
   memset(&hints, 0, sizeof hints);
-  hints.ai_family = AF_UNSPEC; //AF_INET or AF_INET6 to force version
-  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_family = AF_UNSPEC;     //AF_INET or AF_INET6 to force version
+  hints.ai_socktype = SOCK_STREAM; //TCP port, ie. not UDP
 
   if ((status = getaddrinfo(argv[1], NULL, &hints, &res)) != 0)
   {
@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     }
 
     //convert the IP to a string and print
+    //(IPv4 or 6, IP address, pointer to [chars], memory size)
     inet_ntop(p->ai_family, addr, ipstr, sizeof ipstr);
     printf(" %s: %s \n", ipver, ipstr);
   }
