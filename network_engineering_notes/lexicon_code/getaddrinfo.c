@@ -24,6 +24,16 @@ int main()
   hints.ai_socktype = SOCK_STREAM; //TCP stream sockets
   hints.ai_flags = AI_PASSIVE;     //fill in my IP for me
 
+  /*
+  A host can have multiple IP addresses so getaddrinfo() gives us all
+  the accessible IP addresses of a host
+  
+  getaddrinfo(host name or ip to connect to, 
+                post to connect to, 
+                relevant setup info,
+                address to return info to )
+  */
+
   status = getaddrinfo(NULL, "3490", &hints, &servinfo);
   //servinfo now points to a linked list of struct addrinfos
   //ie. servinfo is used to return value from getaddrinfo
