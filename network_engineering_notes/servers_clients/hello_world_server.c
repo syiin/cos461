@@ -62,6 +62,7 @@ int main()
   }
 
   //INITIALISE THE SERVER - eg. a host can have multiple IP addresses
+  //loop through and bind to the first one we can
   for (p = servinfo; p != NULL; p = p->ai_next)
   {
     //try to initialise socket - go to the next available address if unable
