@@ -27,7 +27,7 @@ int main()
   /*
   A host can have multiple IP addresses so getaddrinfo() gives us all
   the accessible IP addresses of a host
-  
+
   getaddrinfo(host name or ip to connect to, 
                 post to connect to, 
                 relevant setup info,
