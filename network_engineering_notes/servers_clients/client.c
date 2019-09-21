@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
   freeaddrinfo(servinfo);
 
-  if ((numbytes == recv(sockfd, buf, MAXDATASIZE - 1, 0)) == -1)
+  if ((numbytes = recv(sockfd, buf, MAXDATASIZE - 1, 0)) == -1)
   {
     perror("recv");
     exit(1);
