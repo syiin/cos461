@@ -52,13 +52,13 @@ int client(char *server_ip, char *server_port)
   {
     if ((sockfd = socket(p->ai_family,
                          p->ai_socktype,
-                         p->ai_protoco)))
+                         p->ai_protocol)) == -1)
     {
       perror("client: socket");
       continue;
     }
 
-    if (sockfd = connect(sockfd, p->ai_addr, p->ai_addrlen) == -1)
+    if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1)
     {
       close(sockfd);
       perror("client: connect");
@@ -80,15 +80,21 @@ int client(char *server_ip, char *server_port)
   printf("client: connecting %s\n", s);
   freeaddrinfo(servinfo);
 
-  if ((numbytes = recv(sockfd, buf, MAXDATASIZE - 1, 0)) == -1)
+  read(STDIN_FILENO, buf, SEND_BUFFER_SIZE);
+
+  if (send(sockfd, buf, SEND_BUFFER_SIZE, 0) == -1)
   {
-    perror('recv');
-    ;
-    exit(1);
+    perror("send");
   }
 
-  buf[numbytes] = '\0';
-  printf("client recieved: %s \n", buf);
+  // if ((numbytes = recv(sockfd, buf, SEND_BUFFER_SIZE - 1, 0)) == -1)
+  // {
+  //   perror("recv");
+  //   exit(1);
+  // }
+
+  // buf[numbytes] = '\0';
+  // printf("client recieved: %s \n", buf);
   close(sockfd);
 
   return 0;
