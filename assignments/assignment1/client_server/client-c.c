@@ -17,12 +17,30 @@
 
 #define SEND_BUFFER_SIZE 2048
 
+void *get_in_addr(struct sockaddr *sa)
+{
+  if (sa->sa_family == AF_INET)
+  {
+    return &((struct sockaddr_in *)sa)->sin_addr;
+  }
+  return &((struct sockaddr_in6 *)sa)->sin6_addr;
+}
 
 /* TODO: client()
  * Open socket and send message from stdin.
  * Return 0 on success, non-zero on failure
 */
 int client(char *server_ip, char *server_port) {
+  int sockfd, numbytes;
+  char buf[SEND_BUFFER_SIZE];
+  struct addrinfo hints, *servinfo, *p;
+  int rv;
+  char s[INET6_ADDRSTRLEN];
+
+  memset(&hints, 0, sizeof hints);
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+
   return 0;
 }
 
