@@ -10,7 +10,6 @@ class Router:
        Subclass this class and override the "handle..." methods
        to implement routing algorithm functionality"""
 
-
     def __init__(self, addr, heartbeatTime=None):
         """Initialize Router address and threadsafe queue for link changes"""
         self.addr = addr       # address of router
@@ -18,13 +17,11 @@ class Router:
         self.linkChanges = Queue.Queue()
         self.keepRunning = True
 
-
     def changeLink(self, change):
         """Add, remove, or change the cost of a link.
            The change argument is a tuple with first element
            'add', or 'remove' """
         self.linkChanges.put(change)
-
 
     def addLink(self, port, endpointAddr, link, cost):
         """Add new link to router"""
@@ -33,12 +30,11 @@ class Router:
         self.links[port] = link
         self.handleNewLink(port, endpointAddr, cost)
 
-
     def removeLink(self, port):
         """Remove link from router"""
-        self.links = {p:link for p,link in self.links.iteritems() if p != port}
+        self.links = {p: link for p,
+                      link in self.links.iteritems() if p != port}
         self.handleRemoveLink(port)
-
 
     def runRouter(self):
         """Main loop of router"""
@@ -59,7 +55,6 @@ class Router:
                     self.handlePacket(port, packet)
             self.handleTime(timeMillisecs)
 
-
     def send(self, port, packet):
         """Send a packet out given port"""
         try:
@@ -67,27 +62,22 @@ class Router:
         except KeyError:
             pass
 
-
     def handlePacket(self, port, packet):
         """process incoming packet"""
         # default implementation sends packet back out the port it arrived
         self.send(port, packet)
 
-
     def handleNewLink(self, port, endpoint, cost):
         """handle new link"""
         pass
-
 
     def handleRemoveLink(self, port):
         """handle removed link"""
         pass
 
-
     def handleTime(self, timeMillisecs):
         """handle current time"""
         pass
-
 
     def debugString(self):
         """generate a string for debugging in network visualizer"""
