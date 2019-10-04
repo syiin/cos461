@@ -12,6 +12,8 @@ from json import dumps, loads
 
 import random
 
+# python visualize_network.py 05_pg242_net.json DV
+
 
 class DVrouter(Router):
     """Distance vector routing protocol implementation."""
@@ -29,61 +31,25 @@ class DVrouter(Router):
         pkt_link = self.links[port]
         link_src = pkt_link.e1 if pkt_link.e1 != self.addr else pkt_link.e2
 
-        if packet.kind == 1:
-            req_pkt = self.handle_traceroute_pkt(port, packet)
+        if packet.kind == 2:
+            self.handle_traceroute_pkt(port, packet)
         else:
-            req_pkt = self.handle_routing_pkt(port, packet)
-        self.debug_list.append(
-            {"pd": packet.dstAddr, "addr2port": self.addr2port()})
-
-        # self.debug_list.append(
-        #     {"PORT_IDX": port,
-        #      "PACKET KIND": packet.kind,
-        #      "PACKET CONTENT": req_pkt,
-        #      #  "LINK N NOT ME": link_src,
-        #      "PACKET SRC": packet.srcAddr,
-        #      "PACKET DST": packet.dstAddr,
-        #      "DIST TABLE": self.dist_table})
+            self.handle_routing_pkt(port, packet)
+        self.debug_list.append(self.dist_table)
 
     def handle_traceroute_pkt(self, port, packet):
-        req_pkt = packet.content
-        if packet.dstAddr != self.addr:
-            if self.is_neighbour(packet.dstAddr):
-                port = self.addr2port()[packet.dstAddr]
-                self.send(port, packet)
-            else:
-                random_port = self.get_random_port(port)
-                my_table = {'src': self.addr, 'dist_table': self.dist_table}
-                packet.content = str(my_table)
-                self.send(random_port, packet)
+        self.debug_list.append(packet.content)
+        if packet.content == "neighbour":
+            self.dist_table[packet.srcAddr] = {'port': port,
+                                               'distance': 1}
         else:
-            print(packet)
-        return req_pkt
+            pass
 
     def handle_routing_pkt(self, port, packet):
-        req_pkt = packet.content
         if packet.dstAddr != self.addr:
-            random_port = self.get_random_port(port)
-            packet.content = {'src': self.addr, 'dist_table': self.dist_table}
-            self.send(random_port, packet)
+            pass
         else:
             print(packet)
-        return req_pkt
-
-    def is_neighbour(self, addr):
-        return addr in self.get_neighbours()
-
-    def addr2port(self):
-        return {v: k for k, v in self.links.items()}
-
-    def get_neighbours(self):
-        neighbours = {}
-        for port, link in self.links.items():
-            neighbours[link.e1] = {}
-            neighbours[link.e1][link.e2] = link.l12
-            neighbours[link.e2] = {}
-            neighbours[link.e2][link.e1] = link.l21
-        return neighbours
 
     def get_random_port(self, except_port):
         tmp_dict = self.links
@@ -102,7 +68,17 @@ class DVrouter(Router):
 
     def handleTime(self, timeMillisecs):
         """TODO: handle current time"""
-        pass
+        if timeMillisecs % 30 == 0:
+            kind = 2
+            srcAddr = self.addr
+            dstAddr = self.addr
+            content = "neighbour"
+            routing_pkt = Packet(kind, srcAddr, dstAddr, content)
+            for port in range(4):
+                try:
+                    self.send(port, routing_pkt)
+                except:
+                    pass
 
     def debugString(self):
         """TODO: generate a string for debugging in network visualizer"""
