@@ -9,7 +9,7 @@ from collections import defaultdict
 from router import Router
 from packet import Packet
 from json import dumps, loads
-
+import ast
 import random
 
 # python visualize_network.py 05_pg242_net.json DV
@@ -22,7 +22,7 @@ class DVrouter(Router):
         """TODO: add your own class fields and initialization code here"""
         Router.__init__(self, addr)  # initialize superclass - don't remove
         self.heartbeatTime = heartbeatTime
-        self.dist_table = {}
+        self.dist_table = {self.addr: {'port': -1, 'distance': 0}}
 
         self.debug_list = []
 
@@ -39,24 +39,16 @@ class DVrouter(Router):
 
     def handle_traceroute_pkt(self, port, packet):
         self.debug_list.append(packet.content)
-        if packet.content == "neighbour":
-            self.dist_table[packet.srcAddr] = {'port': port,
-                                               'distance': 1}
-        else:
-            pass
+        p_dist_table = ast.literal_eval(packet.content)
+
+        self.dist_table[packet.srcAddr] = {'port': port,
+                                           'distance': 1}
 
     def handle_routing_pkt(self, port, packet):
         if packet.dstAddr != self.addr:
             pass
         else:
             print(packet)
-
-    def get_random_port(self, except_port):
-        tmp_dict = self.links
-        if len(tmp_dict) > 1:
-            tmp_dict.pop(except_port, None)
-        random_port = random.choice(list(tmp_dict.keys()))
-        return random_port
 
     def handleNewLink(self, port, endpoint, cost):
         """TODO: handle new link"""
@@ -72,7 +64,7 @@ class DVrouter(Router):
             kind = 2
             srcAddr = self.addr
             dstAddr = self.addr
-            content = "neighbour"
+            content = str(self.dist_table)
             routing_pkt = Packet(kind, srcAddr, dstAddr, content)
             for port in range(4):
                 try:
