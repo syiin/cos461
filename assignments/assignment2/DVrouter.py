@@ -28,10 +28,7 @@ class DVrouter(Router):
 
     def handlePacket(self, port, packet):
         """TODO: process incoming packet"""
-        pkt_link = self.links[port]
-        link_src = pkt_link.e1 if pkt_link.e1 != self.addr else pkt_link.e2
-
-        if packet.kind == 2:
+        if packet.isTraceroute():
             self.handle_traceroute_pkt(port, packet)
         else:
             self.handle_routing_pkt(port, packet)
@@ -39,10 +36,10 @@ class DVrouter(Router):
 
     def handle_traceroute_pkt(self, port, packet):
         p_dist_table = ast.literal_eval(packet.content)
-        self.dist_table[packet.srcAddr] = {'port': port,
-                                           'distance': 1}
         p_dist_table.pop(self.addr, None)
         p_dist_table.pop(packet.srcAddr, None)
+
+        self.dist_table[packet.srcAddr] = {'port': port, 'distance': 1}
 
         for row in p_dist_table:
             packet_row = p_dist_table[row]
@@ -59,11 +56,6 @@ class DVrouter(Router):
             pass
         else:
             print(packet)
-
-    # def get_src(dist_table):
-    #     for item in dist_table.items():
-    #         if item.distance == 0:
-    #             return item
 
     def handleNewLink(self, port, endpoint, cost):
         """TODO: handle new link"""
@@ -90,4 +82,3 @@ class DVrouter(Router):
     def debugString(self):
         """TODO: generate a string for debugging in network visualizer"""
         return "{}".format(self.debug_list)
-        # return "{}".format([(self.links[o].e1, self.links[o].e2) for o in self.links])
