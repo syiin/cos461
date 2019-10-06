@@ -35,20 +35,35 @@ class DVrouter(Router):
             self.handle_traceroute_pkt(port, packet)
         else:
             self.handle_routing_pkt(port, packet)
-        self.debug_list.append(self.dist_table)
+        self.debug_list = self.dist_table
 
     def handle_traceroute_pkt(self, port, packet):
-        self.debug_list.append(packet.content)
         p_dist_table = ast.literal_eval(packet.content)
-
         self.dist_table[packet.srcAddr] = {'port': port,
                                            'distance': 1}
+        p_dist_table.pop(self.addr, None)
+        p_dist_table.pop(packet.srcAddr, None)
+
+        for row in p_dist_table:
+            packet_row = p_dist_table[row]
+            if row in self.dist_table:
+                if packet_row['distance'] < self.dist_table[row]['distance']:
+                    packet_row['distance'] += 1
+                    self.dist_table[row] = packet_row
+            else:
+                packet_row['distance'] += 1
+                self.dist_table[row] = packet_row
 
     def handle_routing_pkt(self, port, packet):
         if packet.dstAddr != self.addr:
             pass
         else:
             print(packet)
+
+    # def get_src(dist_table):
+    #     for item in dist_table.items():
+    #         if item.distance == 0:
+    #             return item
 
     def handleNewLink(self, port, endpoint, cost):
         """TODO: handle new link"""
