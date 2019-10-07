@@ -39,16 +39,19 @@ class DVrouter(Router):
         p_dist_table.pop(self.addr, None)
         p_dist_table.pop(packet.srcAddr, None)
 
-        self.dist_table[packet.srcAddr] = {'port': port, 'distance': 1}
+        timeSent = p_dist_table.pop('timeSent', None)
+        distance = (timeSent - self.heartbeatTime) / 1000000
+        self.dist_table[packet.srcAddr] = {'port': port, 'distance': distance}
 
         for row in p_dist_table:
             packet_row = p_dist_table[row]
             if row in self.dist_table:
                 if packet_row['distance'] < self.dist_table[row]['distance']:
-                    packet_row['distance'] += 1
+                    neighbour_addr = self.addr2port(port)
+                    packet_row['distance'] += self.dist_table[neighbour_addr]['distance']
                     self.dist_table[row] = packet_row
             else:
-                packet_row['distance'] += 1
+                packet_row['distance'] += distance
                 self.dist_table[row] = packet_row
 
     def handle_traceroute(self, port, packet):
@@ -60,6 +63,12 @@ class DVrouter(Router):
                 self.dist_table[packet.srcAddr] = {'port': port, 'distance': 1}
         else:
             self.try_send(packet)
+
+    def addr2port(self, port):
+        for k in self.dist_table:
+            if self.dist_table[k]['port'] == port:
+                return k
+        return -1
 
     def handleNewLink(self, port, endpoint, cost):
         """TODO: handle new link"""
@@ -75,7 +84,9 @@ class DVrouter(Router):
             kind = 2
             srcAddr = self.addr
             dstAddr = self.addr
-            content = str(self.dist_table)
+            outgoing_table = self.dist_table.copy()
+            outgoing_table['timeSent'] = timeMillisecs
+            content = str(outgoing_table)
             routing_pkt = Packet(kind, srcAddr, dstAddr, content)
             self.try_send(routing_pkt)
 
